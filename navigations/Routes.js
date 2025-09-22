@@ -1,8 +1,6 @@
-// navigation/Routes.js
-import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import AuthStack from "../stacks/AuthStack";
-// import AppStack from "./AppStack"; // stack para usuário logado
+import AppStack from "../stacks/AppStack";
 import { useAuth } from "../contexts/AuthContext";
 import { ActivityIndicator, View } from "react-native";
 
@@ -19,7 +17,7 @@ export default function Routes() {
 
   return (
     <NavigationContainer>
-      <AuthStack />
+      {user ? <AppStack /> : <AuthStack />}
     </NavigationContainer>
   );
 }

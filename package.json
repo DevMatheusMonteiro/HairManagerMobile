@@ -33,7 +33,8 @@
     "react-native-screens": "~4.16.0",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "^0.21.0",
-    "styled-components": "^6.1.19"
+    "styled-components": "^6.1.19",
+    "@expo/vector-icons": "^15.0.2"
   },
   "private": true,
   "devDependencies": {

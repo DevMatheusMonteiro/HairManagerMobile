@@ -77,7 +77,7 @@ export const SmallText = styled.Text`
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
-/* export const Divider = styled.View`
+export const Divider = styled.View`
   height: 1px;
   width: 100%;
   background-color: ${({ theme }) => theme.colors.textSecondary}33;
@@ -97,4 +97,4 @@ export const Centered = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
-`; */
+`;

@@ -1,41 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FlatList } from "react-native";
-import styled from "styled-components/native";
+import {
+  ScreenContainer,
+  Input,
+  Card,
+  Title,
+  BodyText,
+} from "../../styles/GlobalStyles";
+import { Pressable } from "react-native";
+
 import { searchBusinessAndServices } from "../../services/businessService";
 
-const SearchInput = styled.TextInput`
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 12px;
-  margin: 16px;
-  font-size: 16px;
-`;
-
-const BusinessCard = styled.View`
-  background-color: #fff;
-  padding: 16px;
-  margin: 8px 16px;
-  border-radius: 12px;
-  elevation: 2; /*sombra Android*/
-  shadow-color: #000; /* sombra iOS */
-  shadow-offset: 0px 2px;
-  shadow-opacity: 0.1;
-  shadow-radius: 4px;
-`;
-
-const BusinessTitle = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
-`;
-
-const BusinessDescription = styled.Text`
-  font-size: 14px;
-  color: #666;
-`;
-
-export default function Home() {
+export default function Home({ navigation }) {
   const [query, setQuery] = useState("");
   const [data, setData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   async function fetchData() {
     try {
@@ -46,28 +25,45 @@ export default function Home() {
     }
   }
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  });
+
   useEffect(() => {
     fetchData();
   }, [query]);
 
   return (
-    <>
-      <SearchInput
+    <ScreenContainer>
+      <Input
         placeholder="Pesquise por salões/barbearias ou serviços"
         value={query}
         onChangeText={setQuery}
+        style={{ maxWidth: 300, alignSelf: "center" }}
       />
 
       <FlatList
         data={data}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <BusinessCard>
-            <BusinessTitle>{item.name}</BusinessTitle>
-            <BusinessDescription>{item.description}</BusinessDescription>
-          </BusinessCard>
+          <Card shadow="md" style={{ marginHorizontal: 16, marginVertical: 8 }}>
+            <Pressable
+              onPress={() =>
+                navigation.navigate("BusinessDetail", { businessId: item.id })
+              }
+            >
+              <Title>{item.name}</Title>
+              <BodyText style={{ color: item.description ? "#666" : "" }}>
+                {item.description}
+              </BodyText>
+            </Pressable>
+          </Card>
         )}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
-    </>
+    </ScreenContainer>
   );
 }

@@ -5,46 +5,59 @@ import {
   Card,
   Title,
   BodyText,
+  Button,
+  ButtonText,
 } from "../../styles/GlobalStyles";
 import RNPickerSelect from "react-native-picker-select";
-import { Swipeable } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
 import {
   findAppointmentsByCustomer,
   updateAppointmentStatus,
 } from "../../services/appointmentService";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function MyAppointments({ navigation }) {
+  const options = [
+    { label: "Solicitado", value: "requested" },
+    { label: "Confirmado", value: "confirmed" },
+    { label: "Cancelado", value: "canceled" },
+    { label: "Concluído", value: "completed" },
+  ];
   const { profile } = useAuth();
+  const { theme } = useTheme();
   const [appointments, setAppointments] = useState([]);
   const [statusFilter, setStatusFilter] = useState("requested");
   const [refreshing, setRefreshing] = useState(false);
 
-  // Buscar agendamentos do usuário
+  function displayStatus(status) {
+    return options.find((item) => item.value === status).label;
+  }
+
   async function fetchAppointments() {
     try {
+      setRefreshing(true);
       const res = await findAppointmentsByCustomer({
         customer_id: profile.id,
-        status: statusFilter,
+        status: statusFilter ?? "requested",
       });
       setAppointments(res);
     } catch (e) {
       console.error(e);
+    } finally {
+      setRefreshing(false);
     }
   }
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
     await fetchAppointments();
-    setRefreshing(false);
   }, [statusFilter]);
 
   useEffect(() => {
     fetchAppointments();
   }, [statusFilter]);
 
-  // Cancelar agendamento
   async function handleCancelAppointment(appointment) {
     if (appointment.status !== "requested") {
       Alert.alert(
@@ -74,41 +87,46 @@ export default function MyAppointments({ navigation }) {
     );
   }
 
-  // Renderiza cada card com Swipeable
   function renderAppointmentCard(appointment) {
     const renderRightActions = () => {
       if (appointment.status !== "requested") return null;
 
       return (
-        <Pressable
+        <Button
           style={{
-            backgroundColor: "red",
-            justifyContent: "center",
-            alignItems: "center",
             width: 100,
-            marginVertical: 8,
-            borderRadius: 8,
+            height: 100,
+            padding: 0,
+            alignSelf: "center",
           }}
           onPress={() => handleCancelAppointment(appointment)}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>Cancelar</Text>
-        </Pressable>
+          <ButtonText style={{ color: "#fff", fontWeight: "bold" }}>
+            Cancelar
+          </ButtonText>
+        </Button>
       );
     };
 
     return (
       <Swipeable renderRightActions={renderRightActions}>
-        <Card shadow="md" style={{ marginHorizontal: 16, marginVertical: 8 }}>
+        <Card
+          shadow="xl"
+          style={{
+            marginHorizontal: 16,
+            marginVertical: 8,
+          }}
+        >
           <Pressable
             onPress={() =>
-              navigation.navigate("BusinessDetail", {
-                businessId: appointment.businesses.id,
+              navigation.navigate("Schedule", {
+                screen: "BusinessDetail",
+                params: { businessId: appointment.businesses.id },
               })
             }
           >
-            <Title>{appointment.businesses.name}</Title>
-            <BodyText>Status: {appointment.status}</BodyText>
-            <BodyText>Serviço: {appointment.services.name}</BodyText>
+            <Title>{appointment.services.name}</Title>
+            <BodyText>Status: {displayStatus(appointment.status)}</BodyText>
             <BodyText>
               Data: {new Date(appointment.date).toLocaleString()}
             </BodyText>
@@ -120,28 +138,38 @@ export default function MyAppointments({ navigation }) {
 
   return (
     <ScreenContainer>
-      {/* Filtro de status */}
       <View style={{ marginHorizontal: 16, marginBottom: 8 }}>
         <RNPickerSelect
+          placeholder={{ label: "Selecione um status", value: null }}
+          activeItemStyle={{
+            color: theme.colors.secondary,
+            backgroundColor: theme.colors.background,
+          }}
+          dropdownItemStyle={{
+            color: theme.colors.textPrimary,
+            backgroundColor: theme.colors.surface,
+          }}
           onValueChange={(value) => setStatusFilter(value)}
           value={statusFilter}
-          items={[
-            { label: "Solicitado", value: "requested" },
-            { label: "Confirmado", value: "confirmed" },
-            { label: "Cancelado", value: "canceled" },
-            { label: "Concluído", value: "completed" },
-          ]}
+          items={options}
         />
       </View>
 
-      {/* Lista de agendamentos */}
-      <FlatList
-        data={appointments}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => renderAppointmentCard(item)}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      />
+      {refreshing ? (
+        <BodyText style={{ alignSelf: "center" }}>Carregando...</BodyText>
+      ) : appointments.length > 0 ? (
+        <FlatList
+          data={appointments}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => renderAppointmentCard(item)}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      ) : (
+        <BodyText style={{ alignSelf: "center" }}>
+          Nenhum agendamento encontrado
+        </BodyText>
+      )}
     </ScreenContainer>
   );
 }

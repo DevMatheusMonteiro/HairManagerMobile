@@ -13,10 +13,13 @@ import { findBusinessById } from "../../services/businessService";
 import { DateTime } from "../../components/Datetime";
 import { useAuth } from "../../contexts/AuthContext";
 import { createAppointment } from "../../services/appointmentService";
+import { sendEmail } from "../../services/authService";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function BusinessDetail({ route, navigation }) {
   const { businessId } = route.params;
   const { profile } = useAuth();
+  const { theme } = useTheme();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -77,7 +80,9 @@ export default function BusinessDetail({ route, navigation }) {
                 height: 100,
                 borderWidth: selectedService?.id === item.id ? 2 : 0,
                 borderColor:
-                  selectedService?.id === item.id ? "#6200ee" : "transparent",
+                  selectedService?.id === item.id
+                    ? theme.colors.secondary
+                    : "transparent",
               }}
             >
               <Pressable onPress={() => setSelectedService(item)}>
@@ -109,7 +114,7 @@ export default function BusinessDetail({ route, navigation }) {
                 borderWidth: selectedProfessional?.id === item.id ? 2 : 0,
                 borderColor:
                   selectedProfessional?.id === item.id
-                    ? "#6200ee"
+                    ? theme.colors.secondary
                     : "transparent",
               }}
             >
@@ -152,8 +157,16 @@ export default function BusinessDetail({ route, navigation }) {
           };
 
           const data = await createAppointment(payload);
+          await sendEmail({
+            subject: "Serviço Solicitado",
+            html: `
+            <h1>${selectedService.name}</h1>
+            <p>Profissional: ${selectedProfessional.name}</p>
+            <p>Data/Hora: ${selectedDateTime.toISOString()}</p>
+            `,
+          });
 
-          Alert.alert("Sucesso", JSON.stringify(data));
+          Alert.alert("Sucesso", "Serviço agendado!");
         }}
       >
         <ButtonText>Agendar</ButtonText>

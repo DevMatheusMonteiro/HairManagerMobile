@@ -45,13 +45,13 @@ export async function logout() {
   if (error) throw error;
 }
 
-export async function sendEmail() {
+export async function sendEmail({ subject, html }) {
   const { data, error } = await supabase.functions.invoke("sendEmail", {
     method: "POST",
     body: JSON.stringify({
       to: "carlosmathmonteiro@gmail.com",
-      subject: "Teste de e-mail",
-      html: "<h1>Olá! Este é um teste</h1>",
+      subject,
+      html,
     }),
   });
 

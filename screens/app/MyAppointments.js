@@ -140,6 +140,7 @@ export default function MyAppointments({ navigation }) {
     <ScreenContainer>
       <View style={{ marginHorizontal: 16, marginBottom: 8 }}>
         <RNPickerSelect
+          disabled={refreshing}
           placeholder={{ label: "Selecione um status", value: null }}
           activeItemStyle={{
             color: theme.colors.secondary,

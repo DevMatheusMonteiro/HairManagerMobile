@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FlatList, Pressable } from "react-native";
+import { Alert, FlatList, Pressable } from "react-native";
 import {
   ScreenContainer,
   Card,
@@ -11,26 +11,18 @@ import {
 } from "../../styles/GlobalStyles";
 import { findBusinessById } from "../../services/businessService";
 import { DateTime } from "../../components/Datetime";
-// import { Gesture, GestureDetector } from "react-native-gesture-handler";
-// import { scheduleOnRN } from "react-native-worklets";
+import { useAuth } from "../../contexts/AuthContext";
+import { createAppointment } from "../../services/appointmentService";
 
 export default function BusinessDetail({ route, navigation }) {
   const { businessId } = route.params;
+  const { profile } = useAuth();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [selectedService, setSelectedService] = useState(null);
   const [selectedProfessional, setSelectedProfessional] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
-
-  // const swipeBackGesture = Gesture.Pan()
-  //   .onEnd((e) => {
-  //     if (e.translationX > 50) {
-  //       scheduleOnRN(() => navigation.navigate("Home"));
-  //     }
-  //   })
-  //   .activeOffsetX([-10, 10])
-  //   .activeOffsetX([50, 9999]);
 
   async function fetchBusiness() {
     try {
@@ -145,18 +137,23 @@ export default function BusinessDetail({ route, navigation }) {
           maxWidth: 200,
           alignSelf: "center",
         }}
-        onPress={() => {
+        onPress={async () => {
           if (!selectedService || !selectedProfessional || !selectedDateTime) {
-            alert("Selecione serviço, profissional e data/hora");
+            Alert.alert("Erro", "Selecione serviço, profissional e data/hora");
             return;
           }
 
           const payload = {
-            businessId: business.id,
-            serviceId: selectedService.id,
-            professionalId: selectedProfessional.id,
+            customer_id: profile.id,
+            business_id: business.id,
+            service_id: selectedService.id,
+            professional_id: selectedProfessional.id,
             date: selectedDateTime.toISOString(),
           };
+
+          const data = await createAppointment(payload);
+
+          Alert.alert("Sucesso", JSON.stringify(data));
         }}
       >
         <ButtonText>Agendar</ButtonText>

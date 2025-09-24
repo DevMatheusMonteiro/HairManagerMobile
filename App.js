@@ -4,16 +4,16 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Routes from "./navigations/Routes";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ScreenContainer } from "./styles/GlobalStyles";
+import { GlobalContainer } from "./styles/GlobalStyles";
 
 export default function App() {
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProviderContext theme={theme}>
         <AuthProvider>
-          <ScreenContainer>
+          <GlobalContainer>
             <Routes />
-          </ScreenContainer>
+          </GlobalContainer>
         </AuthProvider>
       </ThemeProviderContext>
     </GestureHandlerRootView>

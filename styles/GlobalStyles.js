@@ -1,8 +1,14 @@
 import styled from "styled-components/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+export const GlobalContainer = styled(SafeAreaView)`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
+
 export const ScreenContainer = styled(SafeAreaView)`
   flex: 1;
+  padding-vertical: 10;
   background-color: ${({ theme }) => theme.colors.background};
 `;
 

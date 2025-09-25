@@ -38,11 +38,32 @@ export async function createUser({
   telephone,
   role = "customer",
   extra,
-  address,
 }) {
+  if (role !== "customer" && role !== "business")
+    throw new Error("Role inválida");
+
+  const storedFunction =
+    role === "customer" ? "create_customer_profile" : "create_business_profile";
+
+  const commonProps = {
+    p_id: id,
+    p_name: name,
+    p_email: email,
+    p_telephone: telephone,
+  };
+
+  const props =
+    role === "customer"
+      ? { ...commonProps, p_cpf: extra.cpf }
+      : {
+          ...commonProps,
+          p_cnpj: extra.cnpj,
+          p_description: extra.description,
+        };
+
   const { data: profileData, error: profileError } = await supabase.rpc(
-    "create_profile_with_address",
-    { p_input: { id, email, name, telephone, role, extra, address } }
+    storedFunction,
+    props
   );
 
   if (profileError) throw profileError;

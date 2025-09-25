@@ -1,7 +1,8 @@
 import { useState } from "react";
 import RNDateTimePickerModal from "react-native-modal-datetime-picker";
-import { ButtonText } from "../styles/GlobalStyles";
+import { BodyText, ButtonText } from "../styles/GlobalStyles";
 import styled from "styled-components/native";
+import { useTheme } from "../contexts/ThemeContext";
 
 const Container = styled.View`
   width: 100%;
@@ -9,6 +10,7 @@ const Container = styled.View`
 
 export function DateTime({ label, date, onConfirm, minimumDate }) {
   const [isVisible, setIsVisible] = useState(false);
+  const { theme } = useTheme();
 
   const handleConfirm = (selectedDate) => {
     setIsVisible(false);
@@ -17,12 +19,16 @@ export function DateTime({ label, date, onConfirm, minimumDate }) {
 
   return (
     <Container>
-      <ButtonText
+      <BodyText
         onPress={() => setIsVisible(true)}
-        style={{ padding: 12, textAlign: "center" }}
+        style={{
+          padding: 12,
+          textAlign: "center",
+          fontFamily: theme.fonts.secondarySemiBold,
+        }}
       >
         {date ? date.toLocaleString() : label}
-      </ButtonText>
+      </BodyText>
 
       <RNDateTimePickerModal
         isVisible={isVisible}

@@ -74,7 +74,7 @@ export default function Login({ navigation }) {
         </Button>
 
         <BodyText
-          onPress={() => navigation.navigate("Register")}
+          onPress={() => navigation.navigate("SelectRole")}
           style={{
             color: theme.colors.secondary,
             marginTop: 15,

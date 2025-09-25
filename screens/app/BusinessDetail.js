@@ -58,9 +58,12 @@ export default function BusinessDetail({ route, navigation }) {
 
   return (
     <ScreenContainer>
-      <ButtonText style={{ padding: 20 }} onPress={() => navigation.goBack()}>
+      <BodyText
+        style={{ padding: 20, fontFamily: theme.fonts.secondarySemiBold }}
+        onPress={() => navigation.goBack()}
+      >
         voltar
-      </ButtonText>
+      </BodyText>
       <ScrollContainer>
         <Title style={{ marginHorizontal: 16, marginBottom: 8 }}>
           Serviços

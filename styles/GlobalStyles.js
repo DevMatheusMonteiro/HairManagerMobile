@@ -8,7 +8,7 @@ export const GlobalContainer = styled(SafeAreaView)`
 
 export const ScreenContainer = styled(SafeAreaView)`
   flex: 1;
-  padding-vertical: 10;
+  padding: 10px;
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
@@ -41,7 +41,7 @@ export const Button = styled.TouchableOpacity`
 export const ButtonText = styled.Text`
   font-family: ${({ theme }) => theme.fonts.secondarySemiBold};
   font-size: 16px;
-  color: ${({ theme }) => theme.colors.textPrimary};
+  color: #fff;
 `;
 
 export const Input = styled.TextInput.attrs(({ theme }) => ({
@@ -74,7 +74,7 @@ export const Subtitle = styled.Text`
 export const BodyText = styled.Text`
   font-family: ${({ theme }) => theme.fonts.primary};
   font-size: 16px;
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
 export const SmallText = styled.Text`

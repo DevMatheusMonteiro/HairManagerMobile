@@ -32,7 +32,7 @@ export default function MyAppointments({ navigation }) {
   const { theme } = useTheme();
   const [appointments, setAppointments] = useState([]);
   const [statusFilter, setStatusFilter] = useState("requested");
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(true);
 
   function displayStatus(status) {
     return options.find((item) => item.value === status).label;
@@ -64,8 +64,9 @@ export default function MyAppointments({ navigation }) {
   }, [statusFilter]);
 
   useEffect(() => {
+    if (!profile) return;
     fetchAppointments();
-  }, [statusFilter]);
+  }, [statusFilter, profile]);
 
   async function handleConfirmAppointment(appointment) {
     if (appointment.status !== "requested") {
@@ -193,6 +194,7 @@ export default function MyAppointments({ navigation }) {
 
     return (
       <Swipeable
+        enableTrackpadTwoFingerGesture={true}
         renderRightActions={renderRightActions}
         renderLeftActions={renderLeftActions}
         onSwipeableOpen={(direction) => {
@@ -211,12 +213,13 @@ export default function MyAppointments({ navigation }) {
           }}
         >
           <Pressable
-            onPress={() =>
+            onPress={() => {
+              if (profile.role !== "customer") return;
               navigation.navigate("Schedule", {
                 screen: "BusinessDetail",
                 params: { businessId: appointment.businesses.id },
-              })
-            }
+              });
+            }}
           >
             <Title>{appointment.services.name}</Title>
             <BodyText>Status: {displayStatus(appointment.status)}</BodyText>

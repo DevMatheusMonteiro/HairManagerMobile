@@ -12,11 +12,14 @@ import RNPickerSelect from "react-native-picker-select";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
 import {
+  findAppointmentsByBusiness,
   findAppointmentsByCustomer,
   updateAppointmentStatus,
 } from "../../services/appointmentService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
+import { sendEmail } from "../../services/authService";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function MyAppointments({ navigation }) {
   const options = [
@@ -38,10 +41,16 @@ export default function MyAppointments({ navigation }) {
   async function fetchAppointments() {
     try {
       setRefreshing(true);
-      const res = await findAppointmentsByCustomer({
-        customer_id: profile.id,
-        status: statusFilter ?? "requested",
-      });
+      const res =
+        profile.role == "customer"
+          ? await findAppointmentsByCustomer({
+              customer_id: profile.id,
+              status: statusFilter ?? "requested",
+            })
+          : await findAppointmentsByBusiness({
+              business_id: profile.id,
+              status: statusFilter ?? "requested",
+            });
       setAppointments(res);
     } catch (e) {
       console.error(e);
@@ -57,6 +66,47 @@ export default function MyAppointments({ navigation }) {
   useEffect(() => {
     fetchAppointments();
   }, [statusFilter]);
+
+  async function handleConfirmAppointment(appointment) {
+    if (appointment.status !== "requested") {
+      Alert.alert(
+        "Atenção",
+        "Só é possível confirmar agendamentos solicitados."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Confirmar agendamento",
+      "Tem certeza que deseja confirmar este agendamento?",
+      [
+        { text: "Não", style: "cancel" },
+        {
+          text: "Sim",
+          onPress: async () => {
+            try {
+              await updateAppointmentStatus(appointment.id, "confirmed");
+              await sendEmail({
+                subject: "Serviço Confirmado",
+                html: `
+                  ${`<p>${
+                    appointment.services.name
+                  } confirmado pelo estabelecimento ${profile.name}</p>
+                      <p>Data: ${new Date(
+                        appointment.date
+                      ).toLocaleString()}</p>
+                      `}
+                `,
+              });
+              fetchAppointments();
+            } catch (e) {
+              console.error(e);
+            }
+          },
+        },
+      ]
+    );
+  }
 
   async function handleCancelAppointment(appointment) {
     if (appointment.status !== "requested") {
@@ -77,6 +127,16 @@ export default function MyAppointments({ navigation }) {
           onPress: async () => {
             try {
               await updateAppointmentStatus(appointment.id, "canceled");
+              await sendEmail({
+                subject: "Serviço Cancelado",
+                html: `
+                  ${
+                    profile.role === "customer"
+                      ? `<p>${appointment.services.name} cancelado pelo cliente ${profile.name}</p>`
+                      : `<p>${appointment.services.name} cancelado pelo estabelecimento ${profile.name}</p>`
+                  }
+                `,
+              });
               fetchAppointments();
             } catch (e) {
               console.error(e);
@@ -101,15 +161,48 @@ export default function MyAppointments({ navigation }) {
           }}
           onPress={() => handleCancelAppointment(appointment)}
         >
-          <ButtonText style={{ color: "#fff", fontWeight: "bold" }}>
-            Cancelar
+          <ButtonText>
+            <Ionicons name="trash-bin-sharp" size={24} />
+          </ButtonText>
+        </Button>
+      );
+    };
+
+    const renderLeftActions = () => {
+      if (appointment.status !== "requested" || profile.role !== "business")
+        return null;
+
+      return (
+        <Button
+          pointerEvents="box-only"
+          style={{
+            backgroundColor: "#0ae026ff",
+            width: 100,
+            height: 100,
+            padding: 0,
+            alignSelf: "center",
+          }}
+          onPress={() => handleConfirmAppointment(appointment)}
+        >
+          <ButtonText>
+            <Ionicons name="checkmark-circle-sharp" size={24} />
           </ButtonText>
         </Button>
       );
     };
 
     return (
-      <Swipeable renderRightActions={renderRightActions}>
+      <Swipeable
+        renderRightActions={renderRightActions}
+        renderLeftActions={renderLeftActions}
+        onSwipeableOpen={(direction) => {
+          if (appointment.status === "requested") {
+            if (direction === "right" && profile.role === "business")
+              handleConfirmAppointment(appointment);
+            if (direction === "left") handleCancelAppointment(appointment);
+          }
+        }}
+      >
         <Card
           shadow="xl"
           style={{

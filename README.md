@@ -81,6 +81,23 @@ npm run ios
 npm run web
 ```
 
+## 👥 Usuários de Teste
+
+O sistema já possui usuários cadastrados para testes de autenticação.
+Todos utilizam a senha padrão: `123456`
+
+### 📌 Salões
+
+- `salao1@email.com` → até `salao5@email.com`
+
+### 📌 Barbearias
+
+- `barbearia1@email.com` → até `barbearia5@email.com`
+
+### 📌 Clientes
+
+- `cliente1@email.com` → até `cliente10@email.com`
+
 ## 📱 Funcionalidades
 
 - 🔎 Pesquisa de salões/barbearias e serviços

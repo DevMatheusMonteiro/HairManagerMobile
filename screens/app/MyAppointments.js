@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { FlatList, Pressable, Alert, View, Text } from "react-native";
+import { FlatList, Pressable, Alert, View } from "react-native";
 import {
   ScreenContainer,
   Card,
